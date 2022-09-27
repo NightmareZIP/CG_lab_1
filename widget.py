@@ -13,7 +13,7 @@ from PySide6.QtGui import (QBrush, QPen, QPolygon, QColor, QConicalGradient, QCu
                            QImage, QKeySequence, QLinearGradient, QPainter,
                            QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QLineEdit, QSizePolicy,
-                               QTextEdit, QToolButton, QWidget)
+                               QTextEdit, QToolButton, QWidget, QVBoxLayout, QHBoxLayout)
 
 
 """
@@ -45,6 +45,7 @@ class MainWidget(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setStyleSheet(u"background-color: rgb(156, 169, 255);\n""")
         self.setupUi()
 #        Ui_Widget().setupUi(self)
 #        self.load_ui()
@@ -53,12 +54,22 @@ class MainWidget(QWidget):
         if not self.objectName():
             self.setObjectName(u"Widget")
         self.resize(585, 390)
-        self.Menu = Menu(self)
+        
+        self.layout = QHBoxLayout(self)
+        self.layout.setContentsMargins(0,0,0,0)
+        menuWidget = QFrame(self)
+        menuWidget.setStyleSheet(u"background-color: rgb(170, 117, 240);\n""")
+
+        menuWidget.setFixedWidth(100)
+        self.layout.addWidget(menuWidget)
+
+        self.Menu = Menu(menuWidget)
+        # menuWidget.resize(1, 3)
 
         self.Drawframe = DrawFrame(self)
-
+        # self.Drawframe.resize(300, 500)
+        self.layout.addWidget(self.Drawframe)
         # MONE DRAW PUT_DOT
-        self.mode = 'NONE'
 
         self.Menu.DrawFigure.clicked.connect(self.drawing)
         self.Menu.PutDot.clicked.connect(self.put_dot)
@@ -114,40 +125,48 @@ class MainWidget(QWidget):
         ui_file.close()
 
 
-class Menu(QFrame):
+class Menu(QVBoxLayout):
     """Класс-контроллер содержит необходимые кнопки"""
 
     def __init__(self, parent):
         super().__init__(parent)
-
+        
         # self.setDot = Signal()
         # self.startDrawFigure = Signal()
         # self.endDrawFigure = Signal()
 
         self.setObjectName(u"Menu")
-        self.setGeometry(QRect(0, 0, 71, 391))
-        self.setStyleSheet(u"background-color: rgb(156, 169, 255);\n""")
-        self.setFrameShape(QFrame.StyledPanel)
-        self.setFrameShadow(QFrame.Raised)
+        # self.setGeometry(QRect(0, 0, 71, 391))
+        # self.setStyleSheet(u"background-color: rgb(156, 169, 255);\n""")
+        # self.setFrameShape(QFrame.StyledPanel)
+        # self.setFrameShadow(QFrame.Raised)
 
-        self.DrawFigure = QToolButton(self)
+        self.DrawFigure = QToolButton()
         self.DrawFigure.setObjectName(u"DrawFigure")
-        self.DrawFigure.setGeometry(QRect(0, 20, 71, 31))
+        self.addWidget(self.DrawFigure)
+        # self.DrawFigure.setGeometry(QRect(0, 20, 71, 31))
         self.DrawFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
 
-        self.PutDot = QToolButton(self)
+        self.PutDot = QToolButton()
         self.PutDot.setObjectName(u"PutDot")
-        self.PutDot.setGeometry(QRect(0, 60, 71, 31))
+        self.addWidget(self.PutDot)
+
+        # self.PutDot.setGeometry(QRect(0, 60, 71, 31))
         self.PutDot.setStyleSheet(u"color: rgb(72, 66, 255);")
 
-        self.TurnFigure = QToolButton(self)
+        self.TurnFigure = QToolButton()
         self.TurnFigure.setObjectName(u"TurnFigure")
-        self.TurnFigure.setGeometry(QRect(0, 160, 71, 31))
+        self.addWidget(self.TurnFigure)
+
+        # self.TurnFigure.setGeometry(QRect(0, 160, 71, 31))
         self.TurnFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
 
-        self.Angle = QLineEdit(self)
+        self.Angle = QLineEdit()
         self.Angle.setObjectName(u"Angle")
-        self.Angle.setGeometry(QRect(0, 140, 71, 20))
+        self.Angle.setMaximumWidth(80)
+        self.addWidget(self.Angle)
+
+        # self.Angle.setGeometry(QRect(0, 40, 71, 20))
         self.Angle.setStyleSheet(u"background-color: rgb(255, 255, 255);")
 
         # self.log_widget = QWidget(self)
@@ -252,7 +271,7 @@ class DrawFrame(QFrame):
                                                     self.dot,
                                                     self.width(),
                                                     self.height())
-   
+
         self.update()
 
     def paintEvent(self, event):
