@@ -8,12 +8,15 @@ def coordinatesAfterTurn (coordinates, corner, point):
     return newCoordinates
 
 
-def turnFigure (figure, corner, point):
+def turnFigure (figure, corner, point, X, Y,):
+    figureNormal = changeFigureSystemCoordinate (figure, X, Y, 'toNormal')
+    pointNormal = changePointSystemCoordinates (point, X, Y, 'toNormal')
     newFigure = []
-    for i in range(len(figure)):
-        newPoint = coordinatesAfterTurn (i, corner, point)
+    for i in range(len(figureNormal)):
+        newPoint = coordinatesAfterTurn (i, corner, pointNormal)
         newFigure.append(newPoint)
-    return (newFigure)
+    figureFrame = changeFigureSystemCoordinate (newFigure, X, Y, 'toFrame')
+    return (figureFrame)
 
 def changePointSystemCoordinates (point, X, Y, mode):
     if (mode=='toNormal'):
@@ -33,4 +36,5 @@ def changeFigureSystemCoordinate (figure, X, Y, mode):
         newPoint = changePointSystemCoordinates (i, X, Y, mode)
         newFigure.append(newPoint)
     return (newFigure)
+
 
