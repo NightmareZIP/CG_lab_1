@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 import sys
-
+import calculation
 
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import (QFile, QCoreApplication, QDate, QDateTime, QLocale,
@@ -69,7 +69,6 @@ class MainWidget(QWidget):
         self.retranslateUi()
 
     def drawing(self):
-        print('D')
         self.Drawframe.drawing()
 
         if self.Drawframe.mode == 'DRAW':
@@ -80,20 +79,19 @@ class MainWidget(QWidget):
         self.Menu.TurnFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
 
     def put_dot(self):
-        print('P')
 
         self.Menu.DrawFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
         self.Menu.PutDot.setStyleSheet(u"color: rgb(124,252,0);")
         self.Menu.TurnFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
-        self.Drawframe.put_dot
+        self.Drawframe.put_dot()
 
     def rotate(self):
-        print('R')
 
         self.Menu.DrawFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
         self.Menu.PutDot.setStyleSheet(u"color: rgb(72, 66, 255);")
         self.Menu.TurnFigure.setStyleSheet(u"color: rgb(124,252,0);")
-        self.Drawframe.rotate
+        self.Drawframe.corner = float(self.Menu.Angle.text())
+        self.Drawframe.rotate()
 
     def retranslateUi(self):
         self.setWindowTitle(QCoreApplication.translate(
@@ -152,14 +150,14 @@ class Menu(QFrame):
         self.Angle.setGeometry(QRect(0, 140, 71, 20))
         self.Angle.setStyleSheet(u"background-color: rgb(255, 255, 255);")
 
-        self.log_widget = QWidget(self)
-        self.log_widget.setObjectName(u"LogWiget")
-        self.log_widget.setGeometry(QRect(0, 200, 71, 211))
-        self.log_widget.setStyleSheet(u"background-color: rgb(255, 255, 255);")
+        # self.log_widget = QWidget(self)
+        # self.log_widget.setObjectName(u"LogWiget")
+        # self.log_widget.setGeometry(QRect(0, 200, 71, 211))
+        # self.log_widget.setStyleSheet(u"background-color: rgb(255, 255, 255);")
 
-        self.LogText = QTextEdit(self.log_widget)
-        self.LogText.setObjectName(u"LogText")
-        self.LogText.setGeometry(QRect(0, 0, 71, 191))
+        # self.LogText = QTextEdit(self.log_widget)
+        # self.LogText.setObjectName(u"LogText")
+        # self.LogText.setGeometry(QRect(0, 0, 71, 191))
 
 
 class DrawFrame(QFrame):
@@ -172,9 +170,9 @@ class DrawFrame(QFrame):
         # MONE DRAW PUT_DOT
         self._mode = 'NONE'
 
-        self.figure = [
-
-        ]
+        self.corner = 0
+        self.figure = []
+        self.turned_figure = []
 
         self.setObjectName(u"Drawframe")
         self.setGeometry(QRect(70, 0, 521, 401))
@@ -208,9 +206,28 @@ class DrawFrame(QFrame):
     def figure(self, new_figure):
         self._figure = new_figure
 
+    @property
+    def corner(self):
+        return self._corner
+
+    @corner.setter
+    def corner(self, new_corner):
+        self._corner = new_corner
+
+    @property
+    def turned_figure(self):
+        return self._turned_figure
+
+    @turned_figure.setter
+    def turned_figure(self, new_turned):
+
+        self._turned_figure = new_turned
+
     def drawing(self):
         if self.mode != 'DRAW':
             self.figure = []
+            self.turned_figure = []
+
             self.mode = 'DRAW'
         else:
             self.mode = 'NONE'
@@ -229,7 +246,14 @@ class DrawFrame(QFrame):
     def put_dot(self):
         self.mode = "PUT_DOT"
 
-    def rotate(self): pass
+    def rotate(self):
+        self.turned_figure = calculation.turnFigure(self.figure,
+                                                    self.corner,
+                                                    self.dot,
+                                                    self.width(),
+                                                    self.height())
+   
+        self.update()
 
     def paintEvent(self, event):
         """Отрисовка точки и фигуры"""
@@ -238,15 +262,30 @@ class DrawFrame(QFrame):
         painter.setBrush(QBrush(Qt.black, Qt.SolidPattern))
         painter.drawLine(self.width()/2, 0, self.width()/2, self.height())
         painter.drawLine(0, self.height()/2, self.width(), self.height()/2)
+
         if self.mode != 'DRAW':
             points = QPolygon([
                 QPoint(coord[0], coord[1]) for coord in self.figure])
             painter.drawPolygon(points)
 
+        # Рисуем точки для фигуры
         painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
         painter.setBrush(QBrush(Qt.red, Qt.SolidPattern))
 
         for point in self.figure:
+            painter.drawEllipse(point[0], point[1], 5, 5)
+
+        # Рисуем точки для повернутой фигуры и ее саму
+        painter.setPen(QPen(Qt.gray, 2, Qt.SolidLine))
+        painter.setBrush(QBrush(Qt.gray, Qt.SolidPattern))
+        points = QPolygon([
+            QPoint(coord[0], coord[1]) for coord in self.turned_figure])
+        painter.drawPolygon(points)
+
+        painter.setPen(QPen(Qt.green, 2, Qt.SolidLine))
+        painter.setBrush(QBrush(Qt.green, Qt.SolidPattern))
+
+        for point in self.turned_figure:
             painter.drawEllipse(point[0], point[1], 5, 5)
 
         painter.setPen(QPen(Qt.green, 2, Qt.SolidLine))
