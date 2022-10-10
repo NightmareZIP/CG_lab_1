@@ -2,7 +2,6 @@
 import os
 from pathlib import Path
 import sys
-import calculation
 
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import (QFile, QCoreApplication, QDate, QDateTime, QLocale,
@@ -16,20 +15,6 @@ from PySide6.QtWidgets import (QApplication, QFrame, QLineEdit, QSizePolicy,
                                QTextEdit, QToolButton, QWidget, QVBoxLayout, QHBoxLayout)
 
 
-"""
-    Автосгенерированн код из граф. редактора, для упрощения работы, повторная генерация может быть вызвана через
-    pyside6-uic form.ui -o MainWindow.py это создаст отдельный файл, из которого можно будет взять код и после испльзовать.
-
-    Примерная логика отрисовок
-    В MainWidget будем привязывать сигналы  к событиям у классов Menu и DrawFrame
-    контроллер (Menu) и модель+отрисовка - DrawDrame
-    Общий алгоритм: вид рисования (новая точка или новая фигура) будет определяться свойством у DrawFrame.mode,
-    Данное свойство будет влиять на работу срабатывания клика по фрейму и выполняться логика методов DrawFrame.
-
-    Логика взаимодействи:
-        При клике по кнопке Меню, вызывается сигнал (см документацию), благодаря которому вызвается событие в DrawFrame
-
-"""
 
 
 class MainWidget(QWidget):
@@ -47,8 +32,7 @@ class MainWidget(QWidget):
         super().__init__()
         self.setStyleSheet(u"background-color: rgb(156, 169, 255);\n""")
         self.setupUi()
-#        Ui_Widget().setupUi(self)
-#        self.load_ui()
+
 
     def setupUi(self):
         if not self.objectName():
@@ -64,16 +48,11 @@ class MainWidget(QWidget):
         self.layout.addWidget(menuWidget)
 
         self.Menu = Menu(menuWidget)
-        # menuWidget.resize(1, 3)
 
         self.Drawframe = DrawFrame(self)
-        # self.Drawframe.resize(300, 500)
         self.layout.addWidget(self.Drawframe)
-        # MONE DRAW PUT_DOT
 
         self.Menu.DrawFigure.clicked.connect(self.drawing)
-        self.Menu.PutDot.clicked.connect(self.put_dot)
-        self.Menu.TurnFigure.clicked.connect(self.rotate)
 
         # Привязать сигнал Menu к событию DrawFrame
 
@@ -86,34 +65,12 @@ class MainWidget(QWidget):
             self.Menu.DrawFigure.setStyleSheet(u"color: rgb(124,252,0);")
         else:
             self.Menu.DrawFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
-        self.Menu.PutDot.setStyleSheet(u"color: rgb(72, 66, 255);")
-        self.Menu.TurnFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
 
-    def put_dot(self):
-
-        self.Menu.DrawFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
-        self.Menu.PutDot.setStyleSheet(u"color: rgb(124,252,0);")
-        self.Menu.TurnFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
-        self.Drawframe.put_dot()
-
-    def rotate(self):
-
-        self.Menu.DrawFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
-        self.Menu.PutDot.setStyleSheet(u"color: rgb(72, 66, 255);")
-        self.Menu.TurnFigure.setStyleSheet(u"color: rgb(124,252,0);")
-        self.Drawframe.corner = float(self.Menu.Angle.text())
-        self.Drawframe.rotate()
 
     def retranslateUi(self):
         self.setWindowTitle(QCoreApplication.translate(
             "Widget", u"Widget", None))
-        self.Menu.DrawFigure.setText(QCoreApplication.translate("Widget", u"\u041d\u0430\u0440\u0438\u0441\u043e\u0432\u0430\u0442\u044c \n"
-                                                                "\u0444\u0438\u0433\u0443\u0440\u0443", None))
-        self.Menu.PutDot.setText(QCoreApplication.translate("Widget", u"\u0423\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c\n"
-                                                            "\u0442\u043e\u0447\u043a\u0443", None))
-        self.Menu.TurnFigure.setText(QCoreApplication.translate(
-            "Widget", u"\u041f\u043e\u0432\u043e\u0440\u043e\u0442", None))
-    # retranslateUi
+        self.Menu.DrawFigure.setText(QCoreApplication.translate("Widget", "Нарисовать\nкривую Безье", None))
 
     def load_ui(self):
         """Стандартный класс загрузки ui если не будем использовать то к удалению"""
@@ -131,53 +88,15 @@ class Menu(QVBoxLayout):
     def __init__(self, parent):
         super().__init__(parent)
         
-        # self.setDot = Signal()
-        # self.startDrawFigure = Signal()
-        # self.endDrawFigure = Signal()
-
         self.setObjectName(u"Menu")
-        # self.setGeometry(QRect(0, 0, 71, 391))
-        # self.setStyleSheet(u"background-color: rgb(156, 169, 255);\n""")
-        # self.setFrameShape(QFrame.StyledPanel)
-        # self.setFrameShadow(QFrame.Raised)
+
 
         self.DrawFigure = QToolButton()
         self.DrawFigure.setObjectName(u"DrawFigure")
         self.addWidget(self.DrawFigure)
-        # self.DrawFigure.setGeometry(QRect(0, 20, 71, 31))
         self.DrawFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
 
-        self.PutDot = QToolButton()
-        self.PutDot.setObjectName(u"PutDot")
-        self.addWidget(self.PutDot)
-
-        # self.PutDot.setGeometry(QRect(0, 60, 71, 31))
-        self.PutDot.setStyleSheet(u"color: rgb(72, 66, 255);")
-
-        self.TurnFigure = QToolButton()
-        self.TurnFigure.setObjectName(u"TurnFigure")
-        self.addWidget(self.TurnFigure)
-
-        # self.TurnFigure.setGeometry(QRect(0, 160, 71, 31))
-        self.TurnFigure.setStyleSheet(u"color: rgb(72, 66, 255);")
-
-        self.Angle = QLineEdit()
-        self.Angle.setObjectName(u"Angle")
-        self.Angle.setMaximumWidth(80)
-        self.addWidget(self.Angle)
-
-        # self.Angle.setGeometry(QRect(0, 40, 71, 20))
-        self.Angle.setStyleSheet(u"background-color: rgb(255, 255, 255);")
-
-        # self.log_widget = QWidget(self)
-        # self.log_widget.setObjectName(u"LogWiget")
-        # self.log_widget.setGeometry(QRect(0, 200, 71, 211))
-        # self.log_widget.setStyleSheet(u"background-color: rgb(255, 255, 255);")
-
-        # self.LogText = QTextEdit(self.log_widget)
-        # self.LogText.setObjectName(u"LogText")
-        # self.LogText.setGeometry(QRect(0, 0, 71, 191))
-
+      
 
 class DrawFrame(QFrame):
     """Класс модель-отображение
@@ -189,18 +108,22 @@ class DrawFrame(QFrame):
         # MONE DRAW PUT_DOT
         self._mode = 'NONE'
 
-        self.corner = 0
         self.figure = []
-        self.turned_figure = []
-
+        self.Bezier = []
         self.setObjectName(u"Drawframe")
         self.setGeometry(QRect(70, 0, 521, 401))
         self.setStyleSheet(u"background-color: rgb(139, 183, 255);")
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Raised)
-        self.dot = [self.width()/2,
-                    self.height()/2]
 
+    @property
+    def bezier(self):
+        return self._Bezier
+
+    @bezier.setter
+    def mode(self, new_Bezier):
+        self._Bezier = new_Bezier
+        
     @property
     def mode(self):
         return self._mode
@@ -210,14 +133,6 @@ class DrawFrame(QFrame):
         self._mode = new_mode
 
     @property
-    def dot(self):
-        return self._dot
-
-    @dot.setter
-    def dot(self, new_dot):
-        self._dot = new_dot
-
-    @property
     def figure(self):
         return self._figure
 
@@ -225,27 +140,10 @@ class DrawFrame(QFrame):
     def figure(self, new_figure):
         self._figure = new_figure
 
-    @property
-    def corner(self):
-        return self._corner
-
-    @corner.setter
-    def corner(self, new_corner):
-        self._corner = new_corner
-
-    @property
-    def turned_figure(self):
-        return self._turned_figure
-
-    @turned_figure.setter
-    def turned_figure(self, new_turned):
-
-        self._turned_figure = new_turned
 
     def drawing(self):
         if self.mode != 'DRAW':
             self.figure = []
-            self.turned_figure = []
 
             self.mode = 'DRAW'
         else:
@@ -257,22 +155,10 @@ class DrawFrame(QFrame):
         if self.mode == 'DRAW':
             self.figure.append([QMouseEvent.position().x(),
                                QMouseEvent.position().y()])
-        elif self.mode == "PUT_DOT":
-            self.dot = [QMouseEvent.position().x(), QMouseEvent.position().y()]
 
         self.update()
 
-    def put_dot(self):
-        self.mode = "PUT_DOT"
 
-    def rotate(self):
-        self.turned_figure = calculation.turnFigure(self.figure,
-                                                    self.corner,
-                                                    self.dot,
-                                                    self.width(),
-                                                    self.height())
-
-        self.update()
 
     def paintEvent(self, event):
         """Отрисовка точки и фигуры"""
@@ -282,10 +168,10 @@ class DrawFrame(QFrame):
         painter.drawLine(self.width()/2, 0, self.width()/2, self.height())
         painter.drawLine(0, self.height()/2, self.width(), self.height()/2)
 
-        if self.mode != 'DRAW':
-            points = QPolygon([
-                QPoint(coord[0], coord[1]) for coord in self.figure])
-            painter.drawPolygon(points)
+        if self.mode != 'DRAW': pass
+            # points = QPolygon([
+            #     QPoint(coord[0], coord[1]) for coord in self.figure])
+            # painter.drawPolygon(points)
 
         # Рисуем точки для фигуры
         painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
@@ -297,19 +183,13 @@ class DrawFrame(QFrame):
         # Рисуем точки для повернутой фигуры и ее саму
         painter.setPen(QPen(Qt.gray, 2, Qt.SolidLine))
         painter.setBrush(QBrush(Qt.gray, Qt.SolidPattern))
-        points = QPolygon([
-            QPoint(coord[0], coord[1]) for coord in self.turned_figure])
-        painter.drawPolygon(points)
-
+       
         painter.setPen(QPen(Qt.green, 2, Qt.SolidLine))
         painter.setBrush(QBrush(Qt.green, Qt.SolidPattern))
 
-        for point in self.turned_figure:
-            painter.drawEllipse(point[0], point[1], 5, 5)
 
         painter.setPen(QPen(Qt.green, 2, Qt.SolidLine))
         painter.setBrush(QBrush(Qt.green, Qt.SolidPattern))
-        painter.drawEllipse(self.dot[0], self.dot[1], 5, 5)
 
         painter.end()
 
